@@ -93,24 +93,19 @@ impl ConnectionSideBar {
                     .items_center()
                     .child(Icon::new(IconName::Folder))
                     .child(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .overflow_hidden()
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .font_semibold()
-                                    .text_color(theme::colors::TEXT)
-                                    .child(connection.name.clone()),
-                            )
-                            .child(
-                                h_flex()
-                                    .gap_2()
-                                    .text_xs()
-                                    .child(connection.database_type.clone())
-                                    .child(connection.summary.clone()),
-                            ),
+                        div().flex().flex_col().overflow_hidden().child(
+                            div()
+                                .text_sm()
+                                .font_semibold()
+                                .text_color(theme::colors::TEXT)
+                                .child(connection.name.clone()),
+                        ), // .child(
+                           //     h_flex()
+                           //         .gap_2()
+                           //         .text_xs()
+                           //         .child(connection.database_type.clone())
+                           //         .child(connection.summary.clone()),
+                           // ),
                     ),
             )
             .on_click({

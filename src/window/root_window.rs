@@ -1,5 +1,5 @@
-use crate::components::layouts::activity_bar::ActivityBar;
 use crate::components::layouts::main_panel::MainPanel;
+use crate::components::layouts::mini_sidebar::MiniSidebar;
 use crate::components::layouts::sidebar::SideBar;
 use crate::components::layouts::titlebar::TitleBar;
 use crate::theme;
@@ -14,7 +14,7 @@ pub struct RootWindow {
 impl RootWindow {
     pub fn new() -> Self {
         Self {
-            title: "Pyew".into(),
+            title: "Quri".into(),
         }
     }
 }
@@ -29,17 +29,23 @@ impl Render for RootWindow {
             .rounded_lg()
             .child(TitleBar::new(self.title.clone()))
             .child(
-                div().size_full().p_1().pt_0().child(
-                    h_resizable("main-layout")
-                        .child(resizable_panel().w_1_4().mr_1().child(SideBar::new()))
-                        .child(
-                            div()
-                                .size_full()
-                                .child(MainPanel::new(self.title.clone()))
-                                .into_any_element(),
+                div()
+                    .flex()
+                    .size_full()
+                    .child(div().child(MiniSidebar::new()))
+                    .child(
+                        div().size_full().p_1().pt_0().child(
+                            h_resizable("main-layout")
+                                .child(resizable_panel().w_1_4().mr_1().child(SideBar::new()))
+                                .child(
+                                    div()
+                                        .size_full()
+                                        .child(MainPanel::new(self.title.clone()))
+                                        .into_any_element(),
+                                ),
                         ),
-                ),
+                    ),
             )
-            .child(ActivityBar::new())
+        // .child(ActivityBar::new())
     }
 }

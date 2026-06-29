@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 pub async fn initialize_local_db() -> Result<DatabaseConnection> {
     let app_data_path: PathBuf = data_dir().context("Cannot find app data dir")?;
 
-    let db_dir = Path::new(&app_data_path).join("pyew");
+    let db_dir = Path::new(&app_data_path).join("quri");
     if !db_dir.exists() {
         std::fs::create_dir_all(&db_dir)
             .with_context(|| format!("Failed to create database directory: {:?}", db_dir))?;
