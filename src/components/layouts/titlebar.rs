@@ -20,6 +20,7 @@ impl RenderOnce for TitleBar {
     fn render(self, _window: &mut Window, cx: &mut App) -> impl IntoElement {
         ComponentTitleBar::new()
             .bg(theme::colors::BACKGROUND)
+            .h_9()
             .border_color(cx.theme().border)
             .child(
                 div()

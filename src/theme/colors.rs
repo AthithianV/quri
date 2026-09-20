@@ -4,7 +4,7 @@ pub const BACKGROUND: Rgba = Rgba {
     r: 24.0 / 255.0,
     g: 24.0 / 255.0,
     b: 27.0 / 255.0,
-    a: 1.0,
+    a: 0.9,
 };
 
 pub const CARD: Rgba = Rgba {

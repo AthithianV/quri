@@ -315,13 +315,13 @@ impl Render for ConnectionWindow {
         v_flex()
             .size_full()
             .rounded_lg()
+            .bg(theme::colors::CARD)
             .overflow_hidden()
             .child(TitleBar::new("Connection".into()))
             .child(
                 div()
                     .p_5()
                     .size_full()
-                    .bg(theme::colors::CARD)
                     .text_color(theme::colors::TEXT)
                     .rounded_lg()
                     .child(

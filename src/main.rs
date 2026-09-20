@@ -64,10 +64,16 @@ fn main() {
             .detach();
 
         // Open the root window
-        cx.open_window(WindowOptions::default(), |window, cx| {
-            let view = cx.new(|_| RootWindow::new());
-            cx.new(|cx| Root::new(view, window, cx).window_shadow_size(px(0.0)))
-        })
+        cx.open_window(
+            WindowOptions {
+                window_background: WindowBackgroundAppearance::Transparent,
+                ..Default::default()
+            },
+            |window, cx| {
+                let view = cx.new(|_| RootWindow::new());
+                cx.new(|cx| Root::new(view, window, cx).window_shadow_size(px(0.0)))
+            },
+        )
         .expect("Failed to open window");
     });
 }

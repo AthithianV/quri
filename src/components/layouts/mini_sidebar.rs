@@ -32,20 +32,22 @@ impl RenderOnce for MiniSidebar {
                     .gap_2()
                     .items_center()
                     .child(
-                        Button::new("mini-sidebar-database").ghost().p_2().icon(
-                            Icon::new(AppIcon::Database).text_color(cx.theme().muted_foreground),
-                        ),
+                        Button::new("mini-sidebar-database")
+                            .ghost()
+                            .p_2()
+                            .icon(Icon::new(AppIcon::Database)),
                     )
                     .child(
-                        Button::new("mini-sidebar-history").ghost().p_2().icon(
-                            Icon::new(AppIcon::History).text_color(cx.theme().muted_foreground),
-                        ),
+                        Button::new("mini-sidebar-history")
+                            .ghost()
+                            .p_2()
+                            .icon(Icon::new(AppIcon::History)),
                     )
                     .child(
                         Button::new("mini-sidebar-saved-query")
                             .ghost()
                             .p_2()
-                            .icon(Icon::new(AppIcon::Save).text_color(cx.theme().muted_foreground)),
+                            .icon(Icon::new(AppIcon::Save)),
                     ),
             )
     }
