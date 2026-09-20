@@ -18,11 +18,11 @@ impl RenderOnce for ActivityBar {
     fn render(self, _window: &mut Window, cx: &mut App) -> impl IntoElement {
         div()
             .w_full()
+            .h_9()
             .px_2()
-            .pb_0p5()
             .flex()
             .items_center()
-            .justify_between()
+            .gap_1()
             .bg(theme::colors::BACKGROUND)
             .text_xs()
             .text_color(theme::colors::TEXT_MUTED)
@@ -32,45 +32,50 @@ impl RenderOnce for ActivityBar {
                     .items_center()
                     .gap_1()
                     .child(
-                        Button::new("activity-database").ghost().small().icon(
+                        Button::new("activity-left-database").ghost().small().icon(
                             Icon::new(AppIcon::Database).text_color(cx.theme().muted_foreground),
                         ),
                     )
                     .child(
-                        Button::new("activity-history").ghost().small().icon(
+                        Button::new("activity-left-history").ghost().small().icon(
                             Icon::new(AppIcon::History).text_color(cx.theme().muted_foreground),
                         ),
                     )
                     .child(
-                        Button::new("activity-saved-query")
+                        Button::new("activity-left-saved-query")
                             .ghost()
                             .small()
                             .icon(Icon::new(AppIcon::Save).text_color(cx.theme().muted_foreground)),
                     ),
             )
+            .child(div().h_5().w_px().bg(cx.theme().border))
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .child(
+                        Button::new("activity-right-code")
+                            .ghost()
+                            .small()
+                            .icon(Icon::new(AppIcon::Code).text_color(cx.theme().muted_foreground)),
+                    )
+                    .child(
+                        Button::new("activity-right-ai")
+                            .ghost()
+                            .small()
+                            .icon(Icon::new(AppIcon::Ai).text_color(cx.theme().muted_foreground)),
+                    ),
+            )
+            .child(div().flex_1())
             .child(
                 div()
                     .flex()
                     .items_center()
                     .gap_3()
-                    // .child(
-                    //     Button::new("language")
-                    //         .ghost()
-                    //         .small()
-                    //         .text_color(cx.theme().muted_foreground)
-                    //         .label("SQL")
-                    //         .icon(Icon::new(AppIcon::Code)),
-                    // )
                     .child("0 cells")
                     .child("0 cols")
-                    // .child("Count 0")
-                    .child("Sum 0") // .child("Avg 0"),
-                    .child(
-                        Button::new("AI")
-                            .ghost()
-                            .small()
-                            .icon(Icon::new(AppIcon::Ai).text_color(cx.theme().muted_foreground)),
-                    ),
+                    .child("Sum 0"),
             )
     }
 }

@@ -1,11 +1,9 @@
+use crate::components::layouts::activity_bar::ActivityBar;
 use crate::components::layouts::main_panel::MainPanel;
-use crate::components::layouts::mini_sidebar::MiniSidebar;
-use crate::components::layouts::sidebar::SideBar;
+use crate::components::layouts::sidebar::{RightSideBar, SideBar};
 use crate::components::layouts::titlebar::TitleBar;
 use crate::theme;
 use gpui::*;
-
-use gpui_component::resizable::{h_resizable, resizable_panel};
 
 pub struct RootWindow {
     title: SharedString,
@@ -31,21 +29,20 @@ impl Render for RootWindow {
             .child(
                 div()
                     .flex()
-                    .size_full()
-                    .child(div().child(MiniSidebar::new()))
+                    .flex_1()
+                    .min_h_0()
+                    .gap_1()
+                    .p_1()
+                    .pt_0()
+                    .child(div().w_1_4().child(SideBar::new()))
                     .child(
-                        div().size_full().p_1().pt_0().child(
-                            h_resizable("main-layout")
-                                .child(resizable_panel().w_1_4().mr_1().child(SideBar::new()))
-                                .child(
-                                    div()
-                                        .size_full()
-                                        .child(MainPanel::new(self.title.clone()))
-                                        .into_any_element(),
-                                ),
-                        ),
-                    ),
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .child(MainPanel::new(self.title.clone())),
+                    )
+                    .child(div().w_1_4().child(RightSideBar::new())),
             )
-        // .child(ActivityBar::new())
+            .child(ActivityBar::new())
     }
 }

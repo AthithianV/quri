@@ -3,19 +3,6 @@
 UI components live in `src/components` and are rendered by GPUI. The root
 composition is in `src/window/root_window.rs`.
 
-## Component hierarchy
-
-```text
-RootWindow
-├── TitleBar
-├── MiniSidebar
-└── resizable layout
-    ├── SideBar
-    │   └── ConnectionSideBar
-    └── MainPanel
-        └── Editor
-```
-
 ## Layout components
 
 ### `TitleBar`
