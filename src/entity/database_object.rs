@@ -1,18 +1,16 @@
-use sea_orm::entity::prelude::*;
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sqlx::FromRow;
+use uuid::Uuid;
 
-#[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "database_object")]
+#[derive(Clone, Debug, PartialEq, Eq, FromRow, Serialize, Deserialize)]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub database_id: Uuid,
     pub name: String,
     pub object_type: String,
     pub definition: Option<String>,
-    pub metadata: Option<Json>,
-    pub created_at: DateTime,
+    pub metadata: Option<Value>,
+    pub created_at: NaiveDateTime,
 }
-
-impl ActiveModelBehavior for ActiveModel {}

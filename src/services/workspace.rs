@@ -1,12 +1,9 @@
 use crate::entity::workspace;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait, DbConn, DbErr, EntityTrait,
-    QueryFilter, QueryOrder,
-};
+use sqlx::SqlitePool;
 use uuid::Uuid;
 
-const PRIMARY_WORKSPACE_ID: &str = "00000000-0000-4000-8000-000000000001";
-const PRIMARY_WORKSPACE_ID_HEX: &str = "00000000000040008000000000000001";
+const PRIMARY_WORKSPACE_ID: Uuid =
+    Uuid::from_bytes([0, 0, 0, 0, 0, 0, 0x40, 0, 0x80, 0, 0, 0, 0, 0, 0, 1]);
 const PRIMARY_WORKSPACE_NAME: &str = "Primary";
 
 #[allow(dead_code)]
@@ -14,63 +11,95 @@ pub struct WorkspaceService;
 
 #[allow(dead_code)]
 impl WorkspaceService {
-    pub async fn get_or_create_opened_workspace(db: &DbConn) -> Result<workspace::Model, DbErr> {
+    pub async fn get_or_create_opened_workspace(
+        db: &SqlitePool,
+    ) -> Result<workspace::Model, sqlx::Error> {
         Self::repair_primary_workspace_id(db).await?;
 
-        if let Some(workspace) = workspace::Entity::find()
-            .filter(workspace::Column::IsOpened.eq(true))
-            .order_by_desc(workspace::Column::LastOpened)
-            .one(db)
-            .await?
+        if let Some(workspace) = sqlx::query_as::<_, workspace::Model>(
+            "SELECT id, name, is_opened, last_opened, created_at, updated_at
+             FROM workspace WHERE is_opened = 1
+             ORDER BY last_opened DESC LIMIT 1",
+        )
+        .fetch_optional(db)
+        .await?
         {
             return Ok(workspace);
         }
 
-        if let Some(workspace) = workspace::Entity::find()
-            .filter(workspace::Column::Name.eq(PRIMARY_WORKSPACE_NAME))
-            .one(db)
-            .await?
+        if let Some(workspace) = sqlx::query_as::<_, workspace::Model>(
+            "SELECT id, name, is_opened, last_opened, created_at, updated_at
+             FROM workspace WHERE name = ? LIMIT 1",
+        )
+        .bind(PRIMARY_WORKSPACE_NAME)
+        .fetch_optional(db)
+        .await?
         {
-            return Self::mark_workspace_opened(db, workspace).await;
+            return Self::mark_workspace_opened(db, workspace.id).await;
         }
 
-        let now = migration::now();
-        let workspace_id = Uuid::parse_str(PRIMARY_WORKSPACE_ID)
-            .map_err(|err| DbErr::Custom(format!("invalid primary workspace id: {err}")))?;
+        let now = chrono::Utc::now().naive_utc();
+        sqlx::query(
+            "INSERT INTO workspace
+             (id, name, is_opened, last_opened, created_at, updated_at)
+             VALUES (?, ?, 1, ?, ?, ?)",
+        )
+        .bind(PRIMARY_WORKSPACE_ID)
+        .bind(PRIMARY_WORKSPACE_NAME)
+        .bind(now)
+        .bind(now)
+        .bind(now)
+        .execute(db)
+        .await?;
 
-        workspace::ActiveModel {
-            id: Set(workspace_id),
-            name: Set(PRIMARY_WORKSPACE_NAME.to_string()),
-            is_opened: Set(Some(true)),
-            last_opened: Set(Some(now)),
-            created_at: Set(Some(now)),
-            updated_at: Set(Some(now)),
-        }
-        .insert(db)
-        .await
+        Self::fetch_by_id(db, PRIMARY_WORKSPACE_ID)
+            .await?
+            .ok_or(sqlx::Error::RowNotFound)
     }
 
     async fn mark_workspace_opened(
-        db: &DbConn,
-        workspace: workspace::Model,
-    ) -> Result<workspace::Model, DbErr> {
-        let now = migration::now();
-        let mut workspace: workspace::ActiveModel = workspace.into();
-        workspace.is_opened = Set(Some(true));
-        workspace.last_opened = Set(Some(now));
-        workspace.updated_at = Set(Some(now));
-        workspace.update(db).await
+        db: &SqlitePool,
+        id: Uuid,
+    ) -> Result<workspace::Model, sqlx::Error> {
+        let now = chrono::Utc::now().naive_utc();
+        sqlx::query(
+            "UPDATE workspace
+             SET is_opened = 1, last_opened = ?, updated_at = ?
+             WHERE id = ?",
+        )
+        .bind(now)
+        .bind(now)
+        .bind(id)
+        .execute(db)
+        .await?;
+
+        Self::fetch_by_id(db, id)
+            .await?
+            .ok_or(sqlx::Error::RowNotFound)
     }
 
-    async fn repair_primary_workspace_id(db: &DbConn) -> Result<(), DbErr> {
-        let repair_primary_workspace = format!(
-            "UPDATE workspace \
-             SET id = x'{PRIMARY_WORKSPACE_ID_HEX}' \
-             WHERE name = '{PRIMARY_WORKSPACE_NAME}' AND typeof(id) = 'text'"
-        );
+    async fn fetch_by_id(
+        db: &SqlitePool,
+        id: Uuid,
+    ) -> Result<Option<workspace::Model>, sqlx::Error> {
+        sqlx::query_as::<_, workspace::Model>(
+            "SELECT id, name, is_opened, last_opened, created_at, updated_at
+             FROM workspace WHERE id = ?",
+        )
+        .bind(id)
+        .fetch_optional(db)
+        .await
+    }
 
-        db.execute_unprepared(&repair_primary_workspace)
-            .await
-            .map(|_| ())
+    async fn repair_primary_workspace_id(db: &SqlitePool) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE workspace SET id = ?
+             WHERE name = ? AND typeof(id) = 'text'",
+        )
+        .bind(PRIMARY_WORKSPACE_ID)
+        .bind(PRIMARY_WORKSPACE_NAME)
+        .execute(db)
+        .await
+        .map(|_| ())
     }
 }

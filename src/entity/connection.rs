@@ -1,5 +1,8 @@
-use sea_orm::entity::prelude::*;
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sqlx::FromRow;
+use uuid::Uuid;
 
 #[allow(dead_code)]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -20,7 +23,7 @@ pub struct PostgresConfig {
     pub username: String,
     pub password: Option<String>,
     pub ssl_mode: Option<String>,
-    pub extra_params: Option<Json>,
+    pub extra_params: Option<Value>,
 }
 
 #[allow(dead_code)]
@@ -31,14 +34,14 @@ pub struct MySqlConfig {
     pub database_name: String,
     pub username: String,
     pub password: Option<String>,
-    pub extra_params: Option<Json>,
+    pub extra_params: Option<Value>,
 }
 
 #[allow(dead_code)]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SqliteConfig {
     pub file_path: String,
-    pub extra_params: Option<Json>,
+    pub extra_params: Option<Value>,
 }
 
 #[allow(dead_code)]
@@ -51,34 +54,25 @@ impl ConnectionConfig {
         }
     }
 
-    pub fn into_json(self) -> Result<Json, serde_json::Error> {
+    pub fn into_json(self) -> Result<Value, serde_json::Error> {
         serde_json::to_value(self)
     }
 
-    pub fn from_json(value: Json) -> Result<Self, serde_json::Error> {
+    pub fn from_json(value: Value) -> Result<Self, serde_json::Error> {
         serde_json::from_value(value)
     }
 }
 
-#[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "connection")]
+#[derive(Clone, Debug, PartialEq, Eq, FromRow, Serialize, Deserialize)]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-
-    #[sea_orm(
-        belongs_to = "super::workspace::Entity",
-        from = "Column::WorkspaceId",
-        to = "super::workspace::Column::Id"
-    )]
     pub workspace_id: Uuid,
 
     pub connection_name: Option<String>,
-    pub connection_config: Json,
-    pub last_connected_at: Option<DateTime>,
-    pub created_at: Option<DateTime>,
-    pub updated_at: Option<DateTime>,
+    pub connection_config: Value,
+    pub last_connected_at: Option<NaiveDateTime>,
+    pub created_at: Option<NaiveDateTime>,
+    pub updated_at: Option<NaiveDateTime>,
 }
 
 #[allow(dead_code)]
@@ -87,5 +81,3 @@ impl Model {
         ConnectionConfig::from_json(self.connection_config.clone())
     }
 }
-
-impl ActiveModelBehavior for ActiveModel {}

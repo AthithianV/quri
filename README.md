@@ -21,7 +21,7 @@ Conceived as a lightning-fast, native alternative to JetBrains DataGrip and DBea
 - **UI Framework:** [GPUI](https://github.com/zed-industries/zed) (developed by Zed Industries)
 - **UI Components:** [gpui-component](https://github.com/longbridge/gpui-component) (providing base UI components and Tree-sitter SQL support)
 - **Database Driver (Remote):** [SQLx](https://github.com/launchbadge/sqlx) for asynchronous, pure-Rust database communication (MySQL, PostgreSQL, SQLite).
-- **Local Storage (App State):** [Sea-ORM](https://www.sea-ql.org/SeaORM/) backed by local SQLite. This handles the storage of connections, saved queries, tabs, and user preferences.
+- **Local Storage (App State):** [SQLx](https://github.com/launchbadge/sqlx) backed by local SQLite. This handles the storage of connections, saved queries, tabs, and user preferences.
 - **Async Runtime:** [Tokio](https://tokio.rs/)
 
 ---

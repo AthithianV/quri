@@ -1,6 +1,6 @@
 use crate::entity::workspace;
 use gpui::Global;
-use sea_orm::DbConn;
+use sqlx::SqlitePool;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
 
@@ -27,7 +27,7 @@ pub struct AppState {
 }
 
 pub struct AppStateInner {
-    pub app_db: RwLock<Option<DbConn>>,
+    pub app_db: RwLock<Option<SqlitePool>>,
     pub opened_workspace: RwLock<Option<workspace::Model>>,
     #[allow(dead_code)]
     pub connection_pools: RwLock<HashMap<i64, ConnectionPool>>,
@@ -65,14 +65,14 @@ impl AppState {
     }
 
     #[allow(dead_code)]
-    pub async fn get_app_db_connection(&self) -> Result<DbConn, String> {
+    pub async fn get_app_db_connection(&self) -> Result<SqlitePool, String> {
         let read_guard = self.inner.app_db.read().await;
         read_guard
             .clone()
             .ok_or_else(|| "App DB not initialized yet".to_string())
     }
 
-    pub async fn set_app_db_connection(&self, db: DbConn) {
+    pub async fn set_app_db_connection(&self, db: SqlitePool) {
         let mut write_guard = self.inner.app_db.write().await;
         *write_guard = Some(db);
     }
