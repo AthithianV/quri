@@ -18,7 +18,6 @@ impl RenderOnce for ActivityBar {
     fn render(self, _window: &mut Window, cx: &mut App) -> impl IntoElement {
         div()
             .w_full()
-            .h_9()
             .px_2()
             .flex()
             .items_center()
