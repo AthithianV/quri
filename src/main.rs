@@ -8,6 +8,8 @@ mod window;
 
 use gpui::*;
 use gpui_component::Root;
+use image::RgbaImage;
+use std::sync::Arc;
 use window::root_window::RootWindow;
 
 use crate::{
@@ -18,6 +20,14 @@ use crate::{
         local_data::initialize_local_db,
     },
 };
+
+fn load_icon() -> Arc<RgbaImage> {
+    let image = image::open("assets/logo.png")
+        .expect("Failed to load logo")
+        .to_rgba8();
+
+    Arc::new(image)
+}
 
 async fn init_db(state: AppState) {
     let runtime = match tokio::runtime::Builder::new_current_thread()
@@ -66,6 +76,7 @@ fn main() {
         // Open the root window
         cx.open_window(
             WindowOptions {
+                icon: Some(load_icon()),
                 window_background: WindowBackgroundAppearance::Transparent,
                 ..Default::default()
             },

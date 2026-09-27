@@ -4836,6 +4836,7 @@ dependencies = [
  "gpui-component",
  "gpui-component-assets",
  "gpui_platform",
+ "image",
  "log",
  "rmp-serde",
  "rust-embed",

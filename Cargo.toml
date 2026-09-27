@@ -24,3 +24,4 @@ sqlx = { version = "0.8.6", features = ["sqlite", "postgres", "mysql", "runtime-
 chrono = { version = "0.4", features = ["serde"] }
 dirs = "6.0.0"
 rust-embed = "8.11.0"
+image = "0.25.10"
