@@ -1,7 +1,9 @@
 use anyhow::anyhow;
 use gpui::*;
+use image::RgbaImage;
 use rust_embed::RustEmbed;
 use std::borrow::Cow;
+use std::sync::Arc;
 
 use gpui::SharedString;
 use gpui_component::IconNamed;
@@ -75,4 +77,12 @@ where
         }
         Ok(list)
     }
+}
+
+pub fn load_icon() -> Arc<RgbaImage> {
+    let image = image::open("assets/logo.png")
+        .expect("Failed to load logo")
+        .to_rgba8();
+
+    Arc::new(image)
 }

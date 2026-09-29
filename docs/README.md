@@ -1,39 +1,32 @@
 # Quri documentation
 
 Quri is a lightweight database client built with Rust, GPUI, and SQLx.
-The application is organized around a small UI layer, persistent SQLx models,
-application state, and database services.
+The application is organized around a small UI layer, persistent SQLx models, application state, and database services.
 
-## Documentation map
+## Crate responsibilities
 
-- [Components](components.md) — GPUI windows and reusable UI elements in `src/components`.
-- [Models](models.md) — shared runtime state and database operation DTOs.
-- [Services](services.md) — persistence services and the database plugin abstraction.
-- [Models](entities.md) — SQLx models mapped to the local application database.
+Quri is split into focused crates so the user interface, application state, persistent data, and extension system can evolve independently.
 
-## Runtime flow
+### `quri-core`
 
-```text
-main
- ├─ initializes the local SQLx database
- ├─ loads or creates the opened workspace
- ├─ stores both in AppState
- └─ opens RootWindow
-      ├─ TitleBar
-      ├─ MiniSidebar
-      ├─ SideBar -> ConnectionSideBar
-      └─ MainPanel -> Editor
-```
+- The application and domain layer.
+- It is responsible for shared application state, active workspaces, open database connection pools, domain models, application services, and interfaces used by infrastructure such as storage, database providers, and extensions.
 
-The local database stores Quri data such as workspaces and saved connections.
-Connections to user databases are handled separately through the database plugin
-services described in [Services](services.md).
+### `quri-storage`
 
-## Source conventions
+- The persistence and database-access layer.
+- It owns stored entities such as workspaces, connections, tabs, settings, and database objects; initializes the local SQLite database; runs persistence services; and provides database provider abstractions for SQLite, PostgreSQL, and MySQL, including metadata, query, and CRUD operations.
 
-- UI types generally implement `Render`, `RenderOnce`, `IntoElement`, or
-  `IntoElement`-related GPUI traits.
-- Database records are SQLx `FromRow` models with explicit SQL queries.
-- Long-running or database operations are asynchronous and return `Result`.
-- `AppState` is registered as a GPUI global and is shared through `Arc` plus
-  asynchronous read/write locks.
+### `quri-ui`
+
+- The desktop presentation layer built with GPUI.
+- It starts the application, creates the root window, applies the theme, loads assets, and provides the connection views, editor, layout, sidebar, title bar, and other user-interface components.
+
+### `quri-extension-api`
+
+- The public contract for Quri extensions.
+- It is intended to contain the shared types, serialization formats, and asynchronous interfaces that an extension uses to communicate with Quri.
+
+### `quri-extension-host`
+
+- The extension runtime boundary. It is intended to discover, load, manage, and communicate with extensions through `quri-extension-api`, while keeping extension lifecycle and execution details outside the core and UI layers.

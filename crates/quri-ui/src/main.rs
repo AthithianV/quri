@@ -3,65 +3,34 @@ mod theme;
 mod utils;
 mod window;
 
+// quri
+use quri_core::utils::logging::setup_logging;
+
+// gpui
 use gpui::*;
 use gpui_component::Root;
-use image::RgbaImage;
-use std::sync::Arc;
 use window::root_window::RootWindow;
 
-use crate::utils::app_icon::{Assets, CombinedAssets};
-
-fn load_icon() -> Arc<RgbaImage> {
-    let image = image::open("assets/logo.png")
-        .expect("Failed to load logo")
-        .to_rgba8();
-
-    Arc::new(image)
-}
-
-// async fn init_db(state: AppState) {
-//     let runtime = match tokio::runtime::Builder::new_current_thread()
-//         .enable_all()
-//         .build()
-//     {
-//         Ok(runtime) => runtime,
-//         Err(error) => {
-//             eprintln!("Failed to create Tokio runtime for local database: {error}");
-//             return;
-//         }
-//     };
-//
-//     match runtime.block_on(initialize_local_db()) {
-//         Ok(db_conn) => {
-//             match runtime.block_on(WorkspaceService::get_or_create_opened_workspace(&db_conn)) {
-//                 Ok(workspace) => runtime.block_on(state.set_opened_workspace(workspace)),
-//                 Err(error) => eprintln!("Failed to fetch opened workspace: {error:?}"),
-//             }
-//
-//             runtime.block_on(state.set_app_db_connection(db_conn));
-//         }
-//         Err(error) => eprintln!("Failed to initialize local database: {error:?}"),
-//     }
-// }
+use crate::utils::{
+    app_icon::{load_icon, Assets, CombinedAssets},
+    global_app_state::GlobalAppState,
+};
 
 fn main() {
+    let _log_guard = setup_logging().expect("failed to initialize logging");
+    tracing::info!("Quri starting");
+
     let app = gpui_platform::application()
         .with_assets(CombinedAssets(Assets, gpui_component_assets::Assets));
 
-    // let state = AppState::new();
-    // let state_for_db = state.clone();
+    let state = GlobalAppState::new();
 
     app.run(move |cx| {
         gpui_component::init(cx);
         theme::apply_component_theme(cx);
 
         // Initialize AppState as a Global
-        //         cx.set_global(state);
-
-        // Spawn task to initialize the database
-        //         cx.background_executor()
-        //             .spawn(init_db(state_for_db.clone()))
-        //             .detach();
+        cx.set_global(state);
 
         // Open the root window
         cx.open_window(

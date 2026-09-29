@@ -34,4 +34,4 @@ Conceived as a lightning-fast, native alternative to JetBrains DataGrip and DBea
 ## Usage
 
 - Ensure Rust is installed - [Rustup](https://rustup.rs/)
-- Run your app with `cargo watch -c -x check -x run`
+- Run your app with `cargo watch -c -x check -x run --bin quri-ui`
