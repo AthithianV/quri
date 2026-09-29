@@ -7,7 +7,7 @@ use gpui::SharedString;
 use gpui_component::IconNamed;
 
 #[derive(RustEmbed)]
-#[folder = "./assets"]
+#[folder = "../../assets"]
 #[include = "icons/**/*.svg"]
 pub struct Assets;
 

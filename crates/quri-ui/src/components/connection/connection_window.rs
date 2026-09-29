@@ -1,10 +1,4 @@
-use crate::{
-    components::layouts::titlebar::TitleBar,
-    entity::connection::{ConnectionConfig, MySqlConfig, PostgresConfig, SqliteConfig},
-    services::connection::{ConnectionService, CreateConnection},
-    state::app_state::AppState,
-    theme,
-};
+use crate::{components::layouts::titlebar::TitleBar, theme};
 use gpui::*;
 use gpui_component::{
     button::{Button, ButtonVariants as _},
@@ -210,50 +204,6 @@ impl ConnectionWindow {
             Some(value)
         }
     }
-
-    fn connection_config_from_form(
-        database_type: DatabaseType,
-        host: String,
-        port: String,
-        username: String,
-        password: Option<String>,
-        database_name: String,
-        sqlite_path: String,
-    ) -> Result<ConnectionConfig, String> {
-        match database_type {
-            DatabaseType::Postgres => Ok(ConnectionConfig::Postgres(PostgresConfig {
-                host,
-                port: port
-                    .parse()
-                    .map_err(|_| "Postgres port must be a number".to_string())?,
-                database_name,
-                username,
-                password,
-                ssl_mode: None,
-                extra_params: None,
-            })),
-            DatabaseType::MySql => Ok(ConnectionConfig::MySql(MySqlConfig {
-                host,
-                port: port
-                    .parse()
-                    .map_err(|_| "MySQL port must be a number".to_string())?,
-                database_name,
-                username,
-                password,
-                extra_params: None,
-            })),
-            DatabaseType::Sqlite => {
-                if sqlite_path.is_empty() {
-                    return Err("SQLite file path is required".to_string());
-                }
-
-                Ok(ConnectionConfig::Sqlite(SqliteConfig {
-                    file_path: sqlite_path,
-                    extra_params: None,
-                }))
-            }
-        }
-    }
 }
 
 impl Render for ConnectionWindow {
@@ -368,12 +318,6 @@ impl Render for ConnectionWindow {
                                     .primary()
                                     .label("Save")
                                     .on_click(move |_, window, cx| {
-                                        let Some(state) = cx.try_global::<AppState>().cloned()
-                                        else {
-                                            eprintln!("AppState is not initialized");
-                                            return;
-                                        };
-
                                         let connection_name =
                                             ConnectionWindow::optional_input_value(&name, cx);
                                         let host = ConnectionWindow::input_value(&host, cx);
@@ -386,36 +330,8 @@ impl Render for ConnectionWindow {
                                         let sqlite_path =
                                             ConnectionWindow::input_value(&sqlite_path, cx);
 
-                                        let connection_config =
-                                            match ConnectionWindow::connection_config_from_form(
-                                                database_type,
-                                                host,
-                                                port,
-                                                username,
-                                                password,
-                                                database_name,
-                                                sqlite_path,
-                                            ) {
-                                                Ok(config) => config,
-                                                Err(error) => {
-                                                    eprintln!("Invalid connection form: {error}");
-                                                    return;
-                                                }
-                                            };
-
                                         window
                                             .spawn(cx, async move |cx| {
-                                                let result = save_connection(
-                                                    state,
-                                                    connection_name,
-                                                    connection_config,
-                                                );
-
-                                                if let Err(error) = result {
-                                                    eprintln!("Failed to save connection: {error}");
-                                                    return;
-                                                }
-
                                                 cx.update(|window, _| window.remove_window()).ok();
                                             })
                                             .detach();
@@ -424,33 +340,4 @@ impl Render for ConnectionWindow {
                     ),
             )
     }
-}
-
-fn save_connection(
-    state: AppState,
-    connection_name: Option<String>,
-    connection_config: ConnectionConfig,
-) -> Result<(), String> {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .map_err(|error| format!("failed to create Tokio runtime: {error}"))?;
-
-    runtime.block_on(async move {
-        let db = state.get_app_db_connection().await?;
-        let workspace = state.get_opened_workspace().await?;
-
-        ConnectionService::create_connection(
-            &db,
-            CreateConnection {
-                workspace_id: workspace.id,
-                connection_name,
-                connection_config,
-                last_connected_at: None,
-            },
-        )
-        .await
-        .map(|_| ())
-        .map_err(|error| error.to_string())
-    })
 }

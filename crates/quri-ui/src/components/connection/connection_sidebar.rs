@@ -1,10 +1,5 @@
 use crate::{
-    components::connection::connection_window::ConnectionWindow,
-    entity::connection::{ConnectionConfig, Model as ConnectionModel},
-    services::connection::ConnectionService,
-    state::app_state::AppState,
-    theme,
-    utils::app_icon::AppIcon,
+    components::connection::connection_window::ConnectionWindow, theme, utils::app_icon::AppIcon,
 };
 use gpui::prelude::FluentBuilder as _;
 use gpui::*;
@@ -38,41 +33,7 @@ impl ConnectionSideBar {
             error: None,
         };
 
-        this.refresh(cx);
         this
-    }
-
-    fn refresh(&mut self, cx: &mut Context<Self>) {
-        let Some(state) = cx.try_global::<AppState>().cloned() else {
-            self.error = Some("App state is not initialized".into());
-            return;
-        };
-
-        self.is_loading = true;
-        self.error = None;
-        cx.notify();
-
-        cx.spawn(async move |this, cx| {
-            let result = load_connections(state);
-
-            _ = this.update(cx, |this, cx| {
-                this.is_loading = false;
-
-                match result {
-                    Ok(connections) => {
-                        this.connections = connections;
-                        this.error = None;
-                    }
-                    Err(error) => {
-                        this.connections.clear();
-                        this.error = Some(error.into());
-                    }
-                }
-
-                cx.notify();
-            });
-        })
-        .detach();
     }
 
     fn render_connection(
@@ -151,7 +112,7 @@ impl Render for ConnectionSideBar {
                                             .ghost()
                                             .icon(Icon::new(AppIcon::Refresh))
                                             .on_click(cx.listener(|this, _, _, cx| {
-                                                this.refresh(cx);
+                                                println!("Refreshed");
                                             })),
                                     )
                                     .child(
@@ -229,71 +190,5 @@ impl Render for ConnectionSideBar {
                             )),
                     ),
             )
-    }
-}
-
-fn load_connections(state: AppState) -> Result<Vec<ConnectionListItem>, String> {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .map_err(|error| format!("failed to create Tokio runtime: {error}"))?;
-
-    runtime.block_on(async move {
-        let db = state.get_app_db_connection().await?;
-        let workspace = state.get_opened_workspace().await?;
-        let connections = ConnectionService::fetch_connections_by_workspace_id(&db, workspace.id)
-            .await
-            .map_err(|error| error.to_string())?;
-
-        Ok(connections.into_iter().map(connection_list_item).collect())
-    })
-}
-
-fn connection_list_item(connection: ConnectionModel) -> ConnectionListItem {
-    match connection.config() {
-        Ok(config) => {
-            let database_type = config.database_type().to_string();
-            let summary = connection_summary(&config);
-            let name = connection
-                .connection_name
-                .filter(|name| !name.trim().is_empty())
-                .unwrap_or_else(|| fallback_connection_name(&config));
-
-            ConnectionListItem {
-                id: connection.id.to_string().into(),
-                name: name.into(),
-                database_type: database_type.into(),
-                summary: summary.into(),
-            }
-        }
-        Err(_) => ConnectionListItem {
-            id: connection.id.to_string().into(),
-            name: connection
-                .connection_name
-                .unwrap_or_else(|| "Invalid connection".to_string())
-                .into(),
-            database_type: "unknown".into(),
-            summary: "Invalid config".into(),
-        },
-    }
-}
-
-fn fallback_connection_name(config: &ConnectionConfig) -> String {
-    match config {
-        ConnectionConfig::Postgres(config) => config.database_name.clone(),
-        ConnectionConfig::MySql(config) => config.database_name.clone(),
-        ConnectionConfig::Sqlite(config) => config.file_path.clone(),
-    }
-}
-
-fn connection_summary(config: &ConnectionConfig) -> String {
-    match config {
-        ConnectionConfig::Postgres(config) => {
-            format!("{}:{}/{}", config.host, config.port, config.database_name)
-        }
-        ConnectionConfig::MySql(config) => {
-            format!("{}:{}/{}", config.host, config.port, config.database_name)
-        }
-        ConnectionConfig::Sqlite(config) => config.file_path.clone(),
     }
 }

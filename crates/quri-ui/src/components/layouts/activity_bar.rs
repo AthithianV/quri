@@ -19,8 +19,10 @@ impl RenderOnce for ActivityBar {
         div()
             .w_full()
             .px_2()
+            .py_0p5()
             .flex()
             .items_center()
+            .justify_between()
             .gap_1()
             .bg(theme::colors::BACKGROUND)
             .text_xs()
@@ -29,7 +31,7 @@ impl RenderOnce for ActivityBar {
                 div()
                     .flex()
                     .items_center()
-                    .gap_1()
+                    .gap_2()
                     .child(
                         Button::new("activity-left-database").ghost().small().icon(
                             Icon::new(AppIcon::Database).text_color(cx.theme().muted_foreground),
@@ -47,12 +49,11 @@ impl RenderOnce for ActivityBar {
                             .icon(Icon::new(AppIcon::Save).text_color(cx.theme().muted_foreground)),
                     ),
             )
-            .child(div().h_5().w_px().bg(cx.theme().border))
             .child(
                 div()
                     .flex()
                     .items_center()
-                    .gap_1()
+                    .gap_2()
                     .child(
                         Button::new("activity-right-code")
                             .ghost()
@@ -65,16 +66,6 @@ impl RenderOnce for ActivityBar {
                             .small()
                             .icon(Icon::new(AppIcon::Ai).text_color(cx.theme().muted_foreground)),
                     ),
-            )
-            .child(div().flex_1())
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap_3()
-                    .child("0 cells")
-                    .child("0 cols")
-                    .child("Sum 0"),
             )
     }
 }

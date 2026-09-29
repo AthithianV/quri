@@ -4825,13 +4825,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "quri"
+name = "quri-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
  "dirs",
+ "image",
+ "log",
+ "rmp-serde",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "quri-ui"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
  "gpui",
  "gpui-component",
  "gpui-component-assets",
@@ -4842,9 +4858,7 @@ dependencies = [
  "rust-embed",
  "serde",
  "serde_json",
- "sqlx",
  "tokio",
- "uuid",
 ]
 
 [[package]]
