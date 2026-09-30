@@ -1,0 +1,9 @@
+pub mod connection_record;
+pub mod database_object_record;
+pub mod database_record;
+pub mod query_history_record;
+pub mod saved_query_record;
+pub mod settings_record;
+pub mod tab_record;
+pub mod workspace_preference_record;
+pub mod workspace_record;

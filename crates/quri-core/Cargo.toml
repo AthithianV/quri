@@ -1,10 +1,13 @@
 [package]
 name = "quri-core"
 description = "quri-core is  orchestration/domain layer"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
+# quri
+quri-storage = { path = "../quri-storage" }
+
 
 anyhow = "1.0"
 async-trait = "0.1"

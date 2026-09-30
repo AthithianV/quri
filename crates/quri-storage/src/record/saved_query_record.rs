@@ -4,14 +4,12 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Eq, FromRow, Serialize, Deserialize)]
-pub struct Model {
+pub struct SavedQueryRecord {
     pub id: Uuid,
     pub connection_id: Uuid,
     pub workspace_id: Uuid,
     pub title: String,
-    pub query_text: String,
-    pub cursor_position: i32,
-    pub is_pinned: bool,
+    pub file_path: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }

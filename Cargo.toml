@@ -1,14 +1,15 @@
 [workspace]
 resolver = "2"
-
 members = [
     "crates/quri-core",
     "crates/quri-ui",
-#     "crates/quri-extension-api",
-#     "crates/quri-runtime",
-#     "crates/quri-cli",
-#
-#     "extensions/postgres",
-#     "extensions/mysql",
-#     "extensions/sqlite",
+    "crates/quri-extension-api",
+    "crates/quri-extension-host",
+    "crates/quri-cli",
+    "crates/quri-storage",
 ]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"

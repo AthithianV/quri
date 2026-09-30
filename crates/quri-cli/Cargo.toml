@@ -1,6 +1,6 @@
 [package]
-name = "quri-extension-host"
-description = "quri-extension-host is the host for quri extensions"
+name = "quri-cli"
+description = "quri-cli for extension development"
 version.workspace = true
 edition.workspace = true
 

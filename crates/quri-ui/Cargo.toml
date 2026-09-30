@@ -1,8 +1,8 @@
 [package]
 name = "quri-ui"
 description = "quri is the Light Weight Database Client built on GPUI for Maximum Performance"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 # quri

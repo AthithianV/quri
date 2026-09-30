@@ -1,8 +1,8 @@
 [package]
 name = "quri-storage"
 description = "quri-storage is for persistent storage of quri data"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 

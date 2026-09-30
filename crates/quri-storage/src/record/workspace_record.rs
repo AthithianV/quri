@@ -1,14 +1,15 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Eq, FromRow, Serialize, Deserialize)]
-pub struct Model {
-    pub key: Uuid,
-    pub workspace_id: Uuid,
-    pub value: Value,
+pub struct WorkspaceRecord {
+    pub id: Uuid,
+    pub name: String,
+    pub is_opened: Option<bool>,
+    pub is_active: Option<bool>,
+    pub last_opened: Option<NaiveDateTime>,
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
 }

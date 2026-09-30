@@ -1,14 +1,5 @@
 # Quri Roadmap
 
-This is the implementation checklist for Quri. It starts from the current
-baseline—an empty sidebar, a main panel, and an initial connection window—and
-turns the architecture plan into small, verifiable milestones.
-
-The rule for this roadmap is simple: every phase should leave Quri in a usable
-state. Do not start extension packaging, registry, or marketplace work until
-the local application can reliably connect to a database, inspect it, execute a
-query, and render the result.
-
 ## Current baseline
 
 - [x] Open a GPUI window with the Quri layout.
