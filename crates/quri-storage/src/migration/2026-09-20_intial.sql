@@ -111,6 +111,7 @@ CREATE TABLE query_history (
     FOREIGN KEY (connection_id)
         REFERENCES connection(id)
         ON DELETE CASCADE,
+
     FOREIGN KEY (workspace_id)
         REFERENCES workspace(id)
         ON DELETE CASCADE

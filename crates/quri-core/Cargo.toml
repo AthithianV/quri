@@ -5,9 +5,6 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-# quri
-quri-storage = { path = "../quri-storage" }
-
 
 anyhow = "1.0"
 async-trait = "0.1"

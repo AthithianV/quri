@@ -1,11 +1,10 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::FromRow;
 use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq, Eq, FromRow, Serialize, Deserialize)]
-pub struct ConnectionRecord {
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ConnectionModel {
     pub id: Uuid,
     pub workspace_id: Uuid,
 
@@ -13,13 +12,11 @@ pub struct ConnectionRecord {
     pub connection_config: Value,
     pub last_connected_at: Option<NaiveDateTime>,
     pub last_introspect_at: Option<NaiveDateTime>,
-    pub created_at: Option<NaiveDateTime>,
-    pub updated_at: Option<NaiveDateTime>,
 }
 
 #[derive(Clone, Debug)]
 #[allow(dead_code)]
-pub struct CreateConnectionRecord {
+pub struct CreateConnectionModel {
     pub workspace_id: Uuid,
     pub connection_name: Option<String>,
     pub connection_config: Value,
@@ -28,7 +25,7 @@ pub struct CreateConnectionRecord {
 
 #[derive(Clone, Debug, Default)]
 #[allow(dead_code)]
-pub struct UpdateConnectionRecord {
+pub struct UpdateConnectionModel {
     pub connection_name: Option<Option<String>>,
     pub connection_config: Option<Value>,
     pub last_connected_at: Option<Option<NaiveDateTime>>,

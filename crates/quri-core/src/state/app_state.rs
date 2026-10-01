@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use crate::model::workspace_model;
+use crate::model::workspace_model::WorkspaceModel;
 
 /// AppState is shared across the application
 #[derive(Clone)]
@@ -10,7 +10,7 @@ pub struct AppState {
 }
 
 pub struct AppStateInner {
-    pub active_workspace: RwLock<Option<workspace_model::Model>>,
+    pub active_workspace: RwLock<Option<WorkspaceModel>>,
 }
 
 impl AppState {
@@ -23,14 +23,14 @@ impl AppState {
     }
 
     #[allow(dead_code)]
-    pub async fn get_active_workspace(&self) -> Result<workspace_model::Model, String> {
+    pub async fn get_active_workspace(&self) -> Result<WorkspaceModel, String> {
         let read_guard = self.inner.active_workspace.read().await;
         read_guard
             .clone()
             .ok_or_else(|| "Opened workspace not initialized yet".to_string())
     }
 
-    pub async fn set_active_workspace(&self, workspace: workspace_model::Model) {
+    pub async fn set_active_workspace(&self, workspace: WorkspaceModel) {
         let mut write_guard = self.inner.active_workspace.write().await;
         *write_guard = Some(workspace);
     }

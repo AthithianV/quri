@@ -1,7 +1,9 @@
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
-use crate::record::connection_record::{self, ConnectionRecord};
+use crate::record::connection_record::{
+    ConnectionRecord, CreateConnectionRecord, UpdateConnectionRecord,
+};
 
 pub struct StorageConnectionRepository {
     pool: SqlitePool,
@@ -14,7 +16,7 @@ impl StorageConnectionRepository {
 
     pub async fn create_connection(
         &self,
-        input: connection_record::CreateConnection,
+        input: CreateConnectionRecord,
     ) -> Result<ConnectionRecord, sqlx::Error> {
         let id = Uuid::new_v4();
         let now = chrono::Utc::now().naive_utc();
@@ -43,7 +45,7 @@ impl StorageConnectionRepository {
     pub async fn update_connection(
         &self,
         id: Uuid,
-        input: connection_record::UpdateConnection,
+        input: UpdateConnectionRecord,
     ) -> Result<Option<ConnectionRecord>, sqlx::Error> {
         let Some(current) = self.fetch_connection_by_id(id).await? else {
             return Ok(None);

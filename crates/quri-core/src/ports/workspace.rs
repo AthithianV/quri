@@ -1,16 +1,15 @@
 use async_trait::async_trait;
-use quri_storage::record::workspace_record::WorkspaceRecord;
 use uuid::Uuid;
 
-use crate::error::QuriResult;
+use crate::{error::QuriResult, model::workspace_model::WorkspaceModel};
 
 #[async_trait]
 pub trait WorkspaceRepository: Send + Sync {
-    async fn get_opened_workspaces(&self) -> QuriResult<Vec<WorkspaceRecord>>;
+    async fn get_opened_workspaces(&self) -> QuriResult<Vec<WorkspaceModel>>;
 
-    async fn mark_workspace_opened(&self, id: Uuid) -> QuriResult<WorkspaceRecord>;
+    async fn mark_workspace_opened(&self, id: Uuid) -> QuriResult<WorkspaceModel>;
 
-    async fn fetch_by_id(&self, id: Uuid) -> QuriResult<Option<WorkspaceRecord>>;
+    async fn fetch_by_id(&self, id: Uuid) -> QuriResult<Option<WorkspaceModel>>;
 
-    async fn fetch_all(&self, id: Uuid) -> QuriResult<Option<WorkspaceRecord>>;
+    async fn fetch_all(&self) -> QuriResult<Vec<WorkspaceModel>>;
 }

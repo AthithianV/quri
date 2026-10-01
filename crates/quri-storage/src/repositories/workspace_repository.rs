@@ -1,4 +1,9 @@
 use crate::record::workspace_record::WorkspaceRecord;
+use async_trait::async_trait;
+use quri_core::{
+    error::QuriError, error::QuriResult, model::workspace_model::WorkspaceModel,
+    ports::workspace::WorkspaceRepository,
+};
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
@@ -10,8 +15,41 @@ impl StorageWorkspaceRepository {
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
+}
 
-    pub async fn get_opened_workspaces(&self) -> Result<Vec<WorkspaceRecord>, sqlx::Error> {
+#[async_trait]
+impl WorkspaceRepository for StorageWorkspaceRepository {
+    async fn get_opened_workspaces(&self) -> QuriResult<Vec<WorkspaceModel>> {
+        self.fetch_opened_records()
+            .await
+            .map(|records| records.into_iter().map(Into::into).collect())
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn mark_workspace_opened(&self, id: Uuid) -> QuriResult<WorkspaceModel> {
+        self.mark_opened_record(id)
+            .await
+            .map(Into::into)
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn fetch_by_id(&self, id: Uuid) -> QuriResult<Option<WorkspaceModel>> {
+        self.fetch_record_by_id(id)
+            .await
+            .map(|record| record.map(Into::into))
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn fetch_all(&self) -> QuriResult<Vec<WorkspaceModel>> {
+        self.fetch_all_records()
+            .await
+            .map(|records| records.into_iter().map(Into::into).collect())
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+}
+
+impl StorageWorkspaceRepository {
+    async fn fetch_opened_records(&self) -> Result<Vec<WorkspaceRecord>, sqlx::Error> {
         let mut transaction = self.pool.begin().await?;
 
         // This will make sure, if there is not active WS, make recently opened as active.
@@ -60,7 +98,7 @@ impl StorageWorkspaceRepository {
         Ok(workspaces)
     }
 
-    async fn mark_workspace_opened(&self, id: Uuid) -> Result<WorkspaceRecord, sqlx::Error> {
+    async fn mark_opened_record(&self, id: Uuid) -> Result<WorkspaceRecord, sqlx::Error> {
         let now = chrono::Utc::now().naive_utc();
         sqlx::query(
             "UPDATE workspace
@@ -76,10 +114,12 @@ impl StorageWorkspaceRepository {
         .execute(&self.pool)
         .await?;
 
-        self.fetch_by_id(id).await?.ok_or(sqlx::Error::RowNotFound)
+        self.fetch_record_by_id(id)
+            .await?
+            .ok_or(sqlx::Error::RowNotFound)
     }
 
-    async fn fetch_by_id(&self, id: Uuid) -> Result<Option<WorkspaceRecord>, sqlx::Error> {
+    async fn fetch_record_by_id(&self, id: Uuid) -> Result<Option<WorkspaceRecord>, sqlx::Error> {
         sqlx::query_as::<_, WorkspaceRecord>(
             "SELECT id, name, is_opened, is_active, last_opened, created_at, updated_at
              FROM workspace WHERE id = ?",
@@ -89,7 +129,7 @@ impl StorageWorkspaceRepository {
         .await
     }
 
-    async fn fetch_all(&self) -> Result<Vec<WorkspaceRecord>, sqlx::Error> {
+    async fn fetch_all_records(&self) -> Result<Vec<WorkspaceRecord>, sqlx::Error> {
         sqlx::query_as::<_, WorkspaceRecord>(
             "SELECT id, name, is_opened, is_active, last_opened, created_at, updated_at
              FROM workspace",
