@@ -1,3 +1,9 @@
+use async_trait::async_trait;
+use quri_core::{
+    error::{QuriError, QuriResult},
+    model::connection_model::{ConnectionModel, CreateConnectionModel, UpdateConnectionModel},
+    ports::connection::ConnectionRepository,
+};
 use sqlx::SqlitePool;
 use uuid::Uuid;
 
@@ -13,8 +19,57 @@ impl StorageConnectionRepository {
     pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
+}
 
-    pub async fn create_connection(
+#[async_trait]
+impl ConnectionRepository for StorageConnectionRepository {
+    async fn create_connection(
+        &self,
+        new_connection: CreateConnectionModel,
+    ) -> QuriResult<ConnectionModel> {
+        self.create_connection_record(new_connection.into())
+            .await
+            .map(Into::into)
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn update_connection(
+        &self,
+        id: Uuid,
+        input: UpdateConnectionModel,
+    ) -> QuriResult<Option<ConnectionModel>> {
+        self.update_connection_record(id, input.into())
+            .await
+            .map(|record| record.map(Into::into))
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn delete_connection(&self, id: Uuid) -> QuriResult<bool> {
+        self.delete_connection_record(id)
+            .await
+            .map_err(|err| QuriError::Storage(err.into()))
+    }
+
+    async fn fetch_connection_by_id(&self, id: Uuid) -> QuriResult<Option<ConnectionModel>> {
+        self.fetch_connection_by_id_record(id)
+            .await
+            .map(|record| record.map(Into::into))
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn fetch_connections_by_workspace_id(
+        &self,
+        workspace_id: Uuid,
+    ) -> QuriResult<Vec<ConnectionModel>> {
+        self.fetch_connections_by_workspace_id_record(workspace_id)
+            .await
+            .map(|records| records.into_iter().map(Into::into).collect())
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+}
+
+impl StorageConnectionRepository {
+    async fn create_connection_record(
         &self,
         input: CreateConnectionRecord,
     ) -> Result<ConnectionRecord, sqlx::Error> {
@@ -37,17 +92,17 @@ impl StorageConnectionRepository {
         .execute(&self.pool)
         .await?;
 
-        self.fetch_connection_by_id(id)
+        self.fetch_connection_by_id_record(id)
             .await?
             .ok_or(sqlx::Error::RowNotFound)
     }
 
-    pub async fn update_connection(
+    async fn update_connection_record(
         &self,
         id: Uuid,
         input: UpdateConnectionRecord,
     ) -> Result<Option<ConnectionRecord>, sqlx::Error> {
-        let Some(current) = self.fetch_connection_by_id(id).await? else {
+        let Some(current) = self.fetch_connection_by_id_record(id).await? else {
             return Ok(None);
         };
 
@@ -73,10 +128,10 @@ impl StorageConnectionRepository {
         .execute(&self.pool)
         .await?;
 
-        self.fetch_connection_by_id(id).await
+        self.fetch_connection_by_id_record(id).await
     }
 
-    pub async fn delete_connection(&self, id: Uuid) -> Result<bool, sqlx::Error> {
+    async fn delete_connection_record(&self, id: Uuid) -> Result<bool, sqlx::Error> {
         let result = sqlx::query("DELETE FROM connection WHERE id = ?")
             .bind(id)
             .execute(&self.pool)
@@ -84,7 +139,7 @@ impl StorageConnectionRepository {
         Ok(result.rows_affected() > 0)
     }
 
-    pub async fn fetch_connection_by_id(
+    async fn fetch_connection_by_id_record(
         &self,
         id: Uuid,
     ) -> Result<Option<ConnectionRecord>, sqlx::Error> {
@@ -100,7 +155,7 @@ impl StorageConnectionRepository {
         .await
     }
 
-    pub async fn fetch_connections_by_workspace_id(
+    async fn fetch_connections_by_workspace_id_record(
         &self,
         workspace_id: Uuid,
     ) -> Result<Vec<ConnectionRecord>, sqlx::Error> {

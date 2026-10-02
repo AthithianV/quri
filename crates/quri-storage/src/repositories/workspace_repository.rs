@@ -19,6 +19,27 @@ impl StorageWorkspaceRepository {
 
 #[async_trait]
 impl WorkspaceRepository for StorageWorkspaceRepository {
+    async fn create_workspace(&self, name: String) -> QuriResult<WorkspaceModel> {
+        self.create_workspace_record(name)
+            .await
+            .map(Into::into)
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn update_workspace(&self, id: Uuid, name: String) -> QuriResult<Option<WorkspaceModel>> {
+        self.update_workspace_record(id, name)
+            .await
+            .map(|record| record.map(Into::into))
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
+    async fn delete_workspace(&self, id: Uuid) -> QuriResult<bool> {
+        self.delete_workspace_record(id)
+            .await
+            .map(Into::into)
+            .map_err(|error| QuriError::Storage(error.into()))
+    }
+
     async fn get_opened_workspaces(&self) -> QuriResult<Vec<WorkspaceModel>> {
         self.fetch_opened_records()
             .await
@@ -49,6 +70,68 @@ impl WorkspaceRepository for StorageWorkspaceRepository {
 }
 
 impl StorageWorkspaceRepository {
+    async fn create_workspace_record(&self, name: String) -> Result<WorkspaceRecord, sqlx::Error> {
+        let id = Uuid::new_v4();
+        let now = chrono::Utc::now().naive_utc();
+
+        sqlx::query(
+            r#"
+            INSERT into workspace (
+                id, name, is_active, is_opened, last_opened, created_at, updated_at
+            ) VALUES
+            ( ?, ?, ?, ?, ?, ?, ?)
+            "#,
+        )
+        .bind(id)
+        .bind(name)
+        .bind(true)
+        .bind(true)
+        .bind(now)
+        .bind(now)
+        .bind(now)
+        .execute(&self.pool)
+        .await?;
+
+        self.fetch_record_by_id(id)
+            .await?
+            .ok_or(sqlx::Error::RowNotFound)
+    }
+
+    async fn update_workspace_record(
+        &self,
+        id: Uuid,
+        name: String,
+    ) -> Result<Option<WorkspaceRecord>, sqlx::Error> {
+        let now = chrono::Utc::now().naive_utc();
+
+        sqlx::query(
+            r#"
+            UPDATE
+                workspace
+            SET
+                name = ?,
+                updated_at = ?
+            WHERE
+                id = ?
+            "#,
+        )
+        .bind(name)
+        .bind(now)
+        .bind(id)
+        .execute(&self.pool)
+        .await?;
+
+        self.fetch_record_by_id(id).await
+    }
+
+    async fn delete_workspace_record(&self, id: Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM workspace WHERE id = ?")
+            .bind(id)
+            .execute(&self.pool)
+            .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
     async fn fetch_opened_records(&self) -> Result<Vec<WorkspaceRecord>, sqlx::Error> {
         let mut transaction = self.pool.begin().await?;
 
