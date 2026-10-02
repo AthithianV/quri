@@ -4945,6 +4945,7 @@ dependencies = [
  "gpui_platform",
  "image",
  "quri-core",
+ "quri-storage",
  "rust-embed",
  "serde",
  "serde_json",

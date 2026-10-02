@@ -1,3 +1,4 @@
+mod bootstrap;
 mod components;
 mod theme;
 mod utils;
@@ -19,6 +20,8 @@ use crate::utils::{
 fn main() {
     let _log_guard = setup_logging().expect("failed to initialize logging");
     tracing::info!("Quri starting");
+
+    let services = bootstrap().await.expect("failed to bootstrap application");
 
     let app = gpui_platform::application()
         .with_assets(CombinedAssets(Assets, gpui_component_assets::Assets));

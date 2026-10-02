@@ -7,6 +7,7 @@ edition.workspace = true
 [dependencies]
 # quri
 quri-core = { path = "../quri-core" }
+quri-storage = { path = "../quri-storage" }
 
 # gpui
 gpui = { git = "https://github.com/zed-industries/zed" }
