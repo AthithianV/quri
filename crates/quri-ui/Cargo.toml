@@ -10,13 +10,7 @@ quri-core = { path = "../quri-core" }
 quri-storage = { path = "../quri-storage" }
 
 # gpui
-gpui = { git = "https://github.com/zed-industries/zed" }
-gpui_platform = { git = "https://github.com/zed-industries/zed", features = ["wayland", "x11"] }
-gpui_tokio = { git = "https://github.com/zed-industries/zed" }
-
-# gpui-component
-gpui-component = { git = "https://github.com/longbridge/gpui-component", features = ["tree-sitter-sql"] }
-gpui-component-assets = { git = "https://github.com/longbridge/gpui-component" }
+gpui-kit = "0.7"
 
 # serde
 serde = { version = "1.0", features = ["derive"] }

@@ -18,12 +18,15 @@ impl ConnectionService {
     }
 
     #[tracing::instrument(skip(self, input))]
-    async fn create_connection(&self, input: CreateConnectionModel) -> QuriResult<ConnectionModel> {
+    pub async fn create_connection(
+        &self,
+        input: CreateConnectionModel,
+    ) -> QuriResult<ConnectionModel> {
         self.repository.create_connection(input).await
     }
 
     #[tracing::instrument(skip(self, input), fields(connection_id = %id))]
-    async fn update_connection(
+    pub async fn update_connection(
         &self,
         id: Uuid,
         input: UpdateConnectionModel,
@@ -32,17 +35,17 @@ impl ConnectionService {
     }
 
     #[tracing::instrument(skip(self), fields(connection_id = %id))]
-    async fn delete_connection(&self, id: Uuid) -> QuriResult<bool> {
+    pub async fn delete_connection(&self, id: Uuid) -> QuriResult<bool> {
         self.repository.delete_connection(id).await
     }
 
     #[tracing::instrument(skip(self), fields(connection_id = %id))]
-    async fn fetch_connection_by_id(&self, id: Uuid) -> QuriResult<Option<ConnectionModel>> {
+    pub async fn fetch_connection_by_id(&self, id: Uuid) -> QuriResult<Option<ConnectionModel>> {
         self.repository.fetch_connection_by_id(id).await
     }
 
     #[tracing::instrument(skip(self), fields(workspace_id = %workspace_id))]
-    async fn fetch_connections_by_workspace_id(
+    pub async fn fetch_connections_by_workspace_id(
         &self,
         workspace_id: Uuid,
     ) -> QuriResult<Vec<ConnectionModel>> {
