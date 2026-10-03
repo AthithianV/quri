@@ -7,8 +7,8 @@ pub struct GlobalAppState(AppState);
 impl Global for GlobalAppState {}
 
 impl GlobalAppState {
-    pub fn new() -> Self {
-        Self(AppState::new())
+    pub fn new(app_state: AppState) -> Self {
+        Self(app_state)
     }
 
     pub fn state(&self) -> AppState {

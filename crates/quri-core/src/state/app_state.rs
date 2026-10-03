@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use crate::model::workspace_model::WorkspaceModel;
+use crate::{model::workspace_model::WorkspaceModel, services::Services};
 
 /// AppState is shared across the application
 #[derive(Clone)]
@@ -10,13 +10,15 @@ pub struct AppState {
 }
 
 pub struct AppStateInner {
+    pub services: Services,
     pub active_workspace: RwLock<Option<WorkspaceModel>>,
 }
 
 impl AppState {
-    pub fn new() -> Self {
+    pub fn new(services: Services) -> Self {
         Self {
             inner: Arc::new(AppStateInner {
+                services,
                 active_workspace: RwLock::new(None),
             }),
         }
